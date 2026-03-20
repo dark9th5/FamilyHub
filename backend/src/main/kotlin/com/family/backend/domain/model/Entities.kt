@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.Table
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -19,10 +20,14 @@ data class FamilyMember(
     val id: Long = 0,
     @Column(unique = true, nullable = false)
     val username: String,
+    @Column(unique = true)
+    val email: String? = null,
+    val emailVerified: Boolean = false,
     @JsonIgnore
     @Column(nullable = false)
     val passwordHash: String,
     val fullName: String,
+    val cityProvince: String = "",
     val bio: String = "",
     val birthDate: LocalDate? = null,
     val avatarUrl: String = "",
@@ -61,6 +66,43 @@ data class TimelineComment(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
     val postId: Long,
+    val authorId: Long,
+    @Column(length = 1000)
+    val content: String,
+    val createdAt: LocalDateTime = LocalDateTime.now()
+)
+
+@Entity
+@Table(
+    name = "social_like",
+    indexes = [
+        Index(name = "idx_social_like_target", columnList = "targetType,targetId"),
+        Index(name = "idx_social_like_member", columnList = "memberId")
+    ]
+)
+data class SocialLike(
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+    val targetType: String,
+    val targetId: Long,
+    val memberId: Long,
+    val createdAt: LocalDateTime = LocalDateTime.now()
+)
+
+@Entity
+@Table(
+    name = "social_comment",
+    indexes = [
+        Index(name = "idx_social_comment_target", columnList = "targetType,targetId"),
+        Index(name = "idx_social_comment_parent", columnList = "parentCommentId")
+    ]
+)
+data class SocialComment(
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+    val targetType: String,
+    val targetId: Long,
+    val parentCommentId: Long? = null,
     val authorId: Long,
     @Column(length = 1000)
     val content: String,

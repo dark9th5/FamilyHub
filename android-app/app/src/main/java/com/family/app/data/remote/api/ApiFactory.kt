@@ -14,6 +14,8 @@ object ApiFactory {
             if (!token.isNullOrBlank()) {
                 requestBuilder.addHeader("Authorization", "Bearer $token")
             }
+            // ngrok free tier can serve a warning/interstitial page unless this header is present.
+            requestBuilder.addHeader("ngrok-skip-browser-warning", "true")
             chain.proceed(requestBuilder.build())
         }
 

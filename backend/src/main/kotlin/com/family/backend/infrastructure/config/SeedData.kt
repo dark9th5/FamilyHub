@@ -30,6 +30,8 @@ class SeedData {
         val admin = memberRepository.findByUsername("admin") ?: memberRepository.save(
             FamilyMember(
                 username = "admin",
+                email = "admin.familyhub@example.com",
+                emailVerified = true,
                 passwordHash = passwordEncoder.encode("admin123"),
                 fullName = "Tran Minh Quan",
                 bio = "Truong toc va dieu phoi su kien",
@@ -42,6 +44,8 @@ class SeedData {
         val child = memberRepository.findByUsername("linh") ?: memberRepository.save(
             FamilyMember(
                 username = "linh",
+                email = "linh.familyhub@example.com",
+                emailVerified = true,
                 passwordHash = passwordEncoder.encode("linh123"),
                 fullName = "Tran Gia Linh",
                 bio = "Thanh vien tre, yeu thich luu giu ky niem",
@@ -54,6 +58,8 @@ class SeedData {
         memberRepository.findByUsername("admin123") ?: memberRepository.save(
             FamilyMember(
                 username = "admin123",
+                email = "admin123.familyhub@example.com",
+                emailVerified = true,
                 passwordHash = passwordEncoder.encode("123"),
                 fullName = "Local Admin 123",
                 bio = "Tai khoan local de test app",
@@ -92,6 +98,13 @@ class SeedData {
                     createdBy = admin.id
                 )
             )
+        }
+
+        // Legacy accounts created before email verification was introduced will be blocked with HTTP 403.
+        // Mark them as verified for local/dev compatibility.
+        val legacyMembers = memberRepository.findAll().filter { !it.emailVerified }
+        if (legacyMembers.isNotEmpty()) {
+            memberRepository.saveAll(legacyMembers.map { it.copy(emailVerified = true) })
         }
     }
 }

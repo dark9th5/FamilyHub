@@ -20,6 +20,8 @@ class SecurityConfig(
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
             .csrf { it.disable() }
+            .httpBasic { it.disable() }
+            .formLogin { it.disable() }
             .cors { }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
@@ -27,6 +29,8 @@ class SecurityConfig(
                     .requestMatchers(
                         "/auth/login",
                         "/auth/register",
+                        "/auth/verify-email",
+                        "/auth/check-username",
                         "/ws-chat/**",
                         "/ws-chat-raw/**"
                     ).permitAll()

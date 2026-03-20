@@ -6,8 +6,11 @@ import com.family.backend.api.dto.CreateEventRequest
 import com.family.backend.api.dto.CreateMemberRequest
 import com.family.backend.api.dto.CreatePostRequest
 import com.family.backend.api.dto.CreateRelationshipRequest
+import com.family.backend.api.dto.CreateSocialCommentRequest
 import com.family.backend.api.dto.RsvpRequest
 import com.family.backend.api.dto.SendChatRequest
+import com.family.backend.api.dto.SocialCommentResponse
+import com.family.backend.api.dto.SocialTargetLikeResponse
 import com.family.backend.application.service.FamilyService
 import com.family.backend.domain.model.FamilyEvent
 import com.family.backend.domain.model.FamilyMember
@@ -138,5 +141,98 @@ class FamilyController(
     private fun authMemberId(authentication: Authentication): Long {
         val principal = authentication.principal as FamilyPrincipal
         return principal.memberId
+    }
+
+    @GetMapping("/social/likes")
+    fun socialLikes(
+        @RequestParam targetType: String,
+        @RequestParam targetIds: List<Long>
+    ): List<SocialTargetLikeResponse> {
+        val normalized = targetType.uppercase()
+        return service.socialLikes(normalized, targetIds)
+            .groupBy { it.targetId }
+            .entries
+            .sortedBy { it.key }
+            .map { (targetId, rows) ->
+                SocialTargetLikeResponse(
+                    targetType = normalized,
+                    targetId = targetId,
+                    memberIds = rows.map { it.memberId }.distinct().sorted()
+                )
+            }
+    }
+
+    @GetMapping("/social/comments")
+    fun socialComments(
+        @RequestParam targetType: String,
+        @RequestParam targetIds: List<Long>
+    ): List<SocialCommentResponse> {
+        val rows = service.socialComments(targetType.uppercase(), targetIds)
+        return rows.sortedBy { it.createdAt }.map { comment ->
+            val likedIds = service.socialLikes("COMMENT", listOf(comment.id)).map { it.memberId }.distinct().sorted()
+            SocialCommentResponse(
+                id = comment.id,
+                targetType = comment.targetType,
+                targetId = comment.targetId,
+                parentCommentId = comment.parentCommentId,
+                authorId = comment.authorId,
+                content = comment.content,
+                likedMemberIds = likedIds,
+                createdAt = comment.createdAt
+            )
+        }
+    }
+
+    @PostMapping("/social/targets/{targetType}/{targetId}/likes/toggle")
+    fun toggleTargetLike(
+        @PathVariable targetType: String,
+        @PathVariable targetId: Long,
+        authentication: Authentication
+    ): SocialTargetLikeResponse {
+        val memberIds = service.toggleTargetLike(targetType.uppercase(), targetId, authMemberId(authentication))
+        return SocialTargetLikeResponse(
+            targetType = targetType.uppercase(),
+            targetId = targetId,
+            memberIds = memberIds
+        )
+    }
+
+    @PostMapping("/social/targets/{targetType}/{targetId}/comments")
+    fun addSocialComment(
+        @PathVariable targetType: String,
+        @PathVariable targetId: Long,
+        @Valid @RequestBody request: CreateSocialCommentRequest,
+        authentication: Authentication
+    ): SocialCommentResponse {
+        val saved = service.addSocialComment(
+            targetType = targetType.uppercase(),
+            targetId = targetId,
+            memberId = authMemberId(authentication),
+            content = request.content,
+            parentCommentId = request.parentCommentId
+        )
+        return SocialCommentResponse(
+            id = saved.id,
+            targetType = saved.targetType,
+            targetId = saved.targetId,
+            parentCommentId = saved.parentCommentId,
+            authorId = saved.authorId,
+            content = saved.content,
+            likedMemberIds = emptyList(),
+            createdAt = saved.createdAt
+        )
+    }
+
+    @PostMapping("/social/comments/{commentId}/likes/toggle")
+    fun toggleCommentLike(
+        @PathVariable commentId: Long,
+        authentication: Authentication
+    ): SocialTargetLikeResponse {
+        val memberIds = service.toggleCommentLike(commentId, authMemberId(authentication))
+        return SocialTargetLikeResponse(
+            targetType = "COMMENT",
+            targetId = commentId,
+            memberIds = memberIds
+        )
     }
 }

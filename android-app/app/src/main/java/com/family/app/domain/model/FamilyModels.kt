@@ -4,6 +4,8 @@ data class FamilyMember(
     val id: Long,
     val username: String,
     val fullName: String,
+    val email: String? = null,
+    val cityProvince: String,
     val bio: String,
     val birthDate: String?,
     val avatarUrl: String,
@@ -112,6 +114,10 @@ data class UserProfileSummary(
     val id: Long,
     val username: String,
     val fullName: String,
+    val cityProvince: String,
+    val birthDate: String?,
+    val bio: String,
+    val email: String?,
     val role: String,
     val avatarUrl: String
 )
@@ -174,7 +180,18 @@ data class FamilyGroup(
     val ownerId: Long,
     val ownerRole: String = "PARENT_FATHER",
     val memberIds: List<Long>,
+    val pendingMemberIds: List<Long> = emptyList(),
     val createdAt: String
+)
+
+data class FamilyJoinRequest(
+    val id: Long,
+    val familyId: Long,
+    val memberId: Long,
+    val status: String,
+    val createdAt: String,
+    val reviewedAt: String? = null,
+    val reviewedBy: Long? = null
 )
 
 data class FamilyMemberRoleAssignment(
@@ -189,6 +206,7 @@ data class ClanGroup(
     val id: Long,
     val name: String,
     val code: String,
+    val ancestralAddress: String? = null,
     val ownerId: Long,
     val memberIds: List<Long>,
     val delegateIds: List<Long> = emptyList(),
@@ -243,5 +261,22 @@ data class ClanTreeLink(
     val toPersonId: Long,
     val relationType: String,
     val createdBy: Long,
+    val createdAt: String
+)
+
+data class SocialTargetLike(
+    val targetType: String,
+    val targetId: Long,
+    val memberIds: List<Long>
+)
+
+data class SocialCommentThread(
+    val id: Long,
+    val targetType: String,
+    val targetId: Long,
+    val parentCommentId: Long? = null,
+    val authorId: Long,
+    val content: String,
+    val likedMemberIds: List<Long> = emptyList(),
     val createdAt: String
 )

@@ -32,6 +32,28 @@ data class CreateCommentRequest(
     @field:NotBlank val content: String
 )
 
+data class CreateSocialCommentRequest(
+    @field:NotBlank val content: String,
+    val parentCommentId: Long? = null
+)
+
+data class SocialTargetLikeResponse(
+    val targetType: String,
+    val targetId: Long,
+    val memberIds: List<Long>
+)
+
+data class SocialCommentResponse(
+    val id: Long,
+    val targetType: String,
+    val targetId: Long,
+    val parentCommentId: Long?,
+    val authorId: Long,
+    val content: String,
+    val likedMemberIds: List<Long>,
+    val createdAt: LocalDateTime
+)
+
 data class CreateEventRequest(
     @field:NotBlank val title: String,
     @field:NotBlank val description: String,

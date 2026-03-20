@@ -4,6 +4,8 @@ data class FamilyMemberDto(
     val id: Long,
     val username: String,
     val fullName: String,
+    val email: String?,
+    val cityProvince: String,
     val bio: String,
     val birthDate: String?,
     val avatarUrl: String,
@@ -108,7 +110,24 @@ data class LoginRequestDto(
 data class RegisterRequestDto(
     val username: String,
     val password: String,
-    val fullName: String
+    val fullName: String,
+    val cityProvince: String,
+    val email: String
+)
+
+data class VerifyEmailRequestDto(
+    val username: String,
+    val email: String,
+    val code: String
+)
+
+data class UsernameAvailabilityResponseDto(
+    val available: Boolean,
+    val message: String
+)
+
+data class MessageResponseDto(
+    val message: String
 )
 
 data class LoginResponseDto(
@@ -123,8 +142,37 @@ data class MeResponseDto(
     val id: Long,
     val username: String,
     val fullName: String,
+    val cityProvince: String,
+    val birthDate: String?,
+    val bio: String,
+    val email: String?,
     val role: String,
     val avatarUrl: String
+)
+
+data class UpdateProfileRequestDto(
+    val fullName: String,
+    val cityProvince: String,
+    val birthDate: String?,
+    val bio: String
+)
+
+data class ChangePasswordRequestDto(
+    val currentPassword: String,
+    val newPassword: String
+)
+
+data class ConfirmCodeRequestDto(
+    val code: String
+)
+
+data class RequestNewEmailCodeRequestDto(
+    val newEmail: String
+)
+
+data class ConfirmNewEmailRequestDto(
+    val newEmail: String,
+    val code: String
 )
 
 data class CreatePostRequestDto(
@@ -162,4 +210,26 @@ data class ChatEnvelopeDto(
     val senderId: Long,
     val message: String,
     val createdAt: String
+)
+
+data class SocialTargetLikeDto(
+    val targetType: String,
+    val targetId: Long,
+    val memberIds: List<Long>
+)
+
+data class SocialCommentThreadDto(
+    val id: Long,
+    val targetType: String,
+    val targetId: Long,
+    val parentCommentId: Long?,
+    val authorId: Long,
+    val content: String,
+    val likedMemberIds: List<Long>,
+    val createdAt: String
+)
+
+data class CreateSocialCommentRequestDto(
+    val content: String,
+    val parentCommentId: Long? = null
 )

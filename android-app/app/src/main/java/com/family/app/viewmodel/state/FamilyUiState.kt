@@ -9,18 +9,22 @@ import com.family.app.domain.model.ClanGroup
 import com.family.app.domain.model.Dashboard
 import com.family.app.domain.model.EventView
 import com.family.app.domain.model.FamilyGroup
+import com.family.app.domain.model.FamilyJoinRequest
 import com.family.app.domain.model.FamilyLocalEvent
 import com.family.app.domain.model.FamilyMemberRoleAssignment
 import com.family.app.domain.model.FamilyMember
 import com.family.app.domain.model.FamilyTask
 import com.family.app.domain.model.FinanceTransaction
 import com.family.app.domain.model.RewardPoint
+import com.family.app.domain.model.SocialCommentThread
+import com.family.app.domain.model.SocialTargetLike
 import com.family.app.domain.model.TaskTemplate
 import com.family.app.domain.model.TimelinePostView
 import com.family.app.domain.model.Tree
 
 data class FamilyUiState(
     val isAuthenticated: Boolean = false,
+    val authMemberId: Long? = null,
     val authUsername: String = "",
     val realtimeConnected: Boolean = false,
     val isLoading: Boolean = false,
@@ -36,10 +40,13 @@ data class FamilyUiState(
     val financeTransactions: List<FinanceTransaction> = emptyList(),
     val ageYears: Int? = null,
     val families: List<FamilyGroup> = emptyList(),
+    val familyJoinRequests: List<FamilyJoinRequest> = emptyList(),
     val familyRoles: List<FamilyMemberRoleAssignment> = emptyList(),
     val clans: List<ClanGroup> = emptyList(),
     val clanJoinRequests: List<ClanJoinRequest> = emptyList(),
     val clanDelegations: List<ClanPermissionDelegation> = emptyList(),
+    val socialLikes: List<SocialTargetLike> = emptyList(),
+    val socialComments: List<SocialCommentThread> = emptyList(),
     val activeFamilyId: Long? = null,
     val activeClanId: Long? = null,
     val familyEvents: List<FamilyLocalEvent> = emptyList(),
@@ -50,7 +57,13 @@ data class FamilyUiState(
     val loginUsername: String = "",
     val loginPassword: String = "",
     val rememberLogin: Boolean = false,
+    val pendingRegisterUsername: String = "",
+    val pendingRegisterEmail: String = "",
+    val usernameAvailability: Boolean? = null,
+    val usernameAvailabilityMessage: String? = null,
+    val awaitingEmailVerification: Boolean = false,
     val error: String? = null,
     val notice: String? = null,
-    val selectedMemberId: Long? = null
+    val selectedMemberId: Long? = null,
+    val profileEmailChangeTicket: String? = null
 )

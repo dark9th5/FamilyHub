@@ -26,6 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
@@ -41,13 +44,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.family.app.ui.navigation.Routes
 import com.family.app.ui.navigation.bottomRoutes
-import com.family.app.ui.screen.ClanHubScreen
-import com.family.app.ui.screen.FamilyHubScreen
-import com.family.app.ui.screen.HomeScreen
-import com.family.app.ui.screen.LoginScreen
-import com.family.app.ui.screen.ProfileScreen
-import com.family.app.ui.screen.RegisterScreen
-import com.family.app.ui.screen.TimelineScreen
+import com.family.app.ui.screen.auth.LoginScreen
+import com.family.app.ui.screen.auth.RegisterScreen
+import com.family.app.ui.screen.clan.ClanHubScreen
+import com.family.app.ui.screen.family.FamilyHubScreen
+import com.family.app.ui.screen.home.HomeScreen
+import com.family.app.ui.screen.profile.ProfileScreen
+import com.family.app.ui.screen.timeline.TimelineScreen
 import com.family.app.ui.theme.FamilyElevation
 import com.family.app.ui.theme.FamilyRadius
 import com.family.app.ui.theme.FamilySpacing
@@ -62,14 +65,29 @@ private val routeIcons: Map<String, ImageVector> = mapOf(
 )
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun FamilyApp(viewModel: FamilyViewModel) {
     val navController = rememberNavController()
     val state by viewModel.state.collectAsState()
     val showClan = (state.ageYears ?: 16) >= 16
     val visibleBottomRoutes = if (showClan) bottomRoutes else bottomRoutes.filter { it != Routes.Clan }
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+    val currentRoute = currentDestination?.route
+    val currentTitle = visibleBottomRoutes.firstOrNull { it.route == currentRoute }?.title ?: "FamilyHub"
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            if (state.isAuthenticated) {
+                TopAppBar(
+                    title = { Text(currentTitle) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
+                    )
+                )
+            }
+        },
         bottomBar = {
             if (state.isAuthenticated) {
                 val navPadding = WindowInsets.navigationBars.asPaddingValues()
@@ -92,15 +110,13 @@ fun FamilyApp(viewModel: FamilyViewModel) {
                                     Brush.linearGradient(
                                         listOf(
                                             androidx.compose.ui.graphics.Color(0xFFD4EBF8),
-                                            androidx.compose.ui.graphics.Color(0xFFF5FAFE),
-                                            androidx.compose.ui.graphics.Color(0xFFEDD7E3)
+                                            androidx.compose.ui.graphics.Color(0xFFF1FAFF),
+                                            androidx.compose.ui.graphics.Color(0xFFE0F6FF)
                                         )
                                     )
                                 )
                                 .padding(horizontal = FamilySpacing.xs, vertical = FamilySpacing.xs)
                         ) {
-                            val backStackEntry by navController.currentBackStackEntryAsState()
-                            val currentDestination = backStackEntry?.destination
                             visibleBottomRoutes.forEach { route ->
                                 val selected = currentDestination?.hierarchy?.any { it.route == route.route } == true
                                 val showFamilyBirthdayBadge =
@@ -109,16 +125,16 @@ fun FamilyApp(viewModel: FamilyViewModel) {
                                     Brush.linearGradient(
                                         colors = listOf(
                                             androidx.compose.ui.graphics.Color(0xFFD4EBF8),
-                                            androidx.compose.ui.graphics.Color(0xFFF4FAFD),
-                                            androidx.compose.ui.graphics.Color(0xFFEDD7E3)
+                                            androidx.compose.ui.graphics.Color(0xFFEFF9FF),
+                                            androidx.compose.ui.graphics.Color(0xFFDBF4FF)
                                         ),
                                     )
                                 } else {
                                     Brush.linearGradient(
                                         colors = listOf(
                                             androidx.compose.ui.graphics.Color(0xFFE8F5FB),
-                                            androidx.compose.ui.graphics.Color(0xFFFAFCFE),
-                                            androidx.compose.ui.graphics.Color(0xFFF5E9EF)
+                                            androidx.compose.ui.graphics.Color(0xFFF8FCFF),
+                                            androidx.compose.ui.graphics.Color(0xFFEDF8FF)
                                         ),
                                     )
                                 }
@@ -200,8 +216,8 @@ fun FamilyApp(viewModel: FamilyViewModel) {
                     RegisterScreen(
                         viewModel = viewModel,
                         onRegistered = {
-                            navController.navigate(Routes.Home.route) {
-                                popUpTo(Routes.Login.route) { inclusive = true }
+                            navController.navigate(Routes.Login.route) {
+                                popUpTo(Routes.Register.route) { inclusive = true }
                             }
                         },
                         onNavigateLogin = {

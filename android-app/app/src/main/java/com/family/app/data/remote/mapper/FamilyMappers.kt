@@ -12,6 +12,8 @@ import com.family.app.data.remote.dto.LoginResponseDto
 import com.family.app.data.remote.dto.MeResponseDto
 import com.family.app.data.remote.dto.MemberRelationshipDto
 import com.family.app.data.remote.dto.RsvpViewDto
+import com.family.app.data.remote.dto.SocialCommentThreadDto
+import com.family.app.data.remote.dto.SocialTargetLikeDto
 import com.family.app.data.remote.dto.TimelineCommentDto
 import com.family.app.data.remote.dto.TimelineCommentViewDto
 import com.family.app.data.remote.dto.TimelinePostDto
@@ -28,6 +30,8 @@ import com.family.app.domain.model.FamilyEvent
 import com.family.app.domain.model.FamilyMember
 import com.family.app.domain.model.MemberRelationship
 import com.family.app.domain.model.RsvpView
+import com.family.app.domain.model.SocialCommentThread
+import com.family.app.domain.model.SocialTargetLike
 import com.family.app.domain.model.TimelineComment
 import com.family.app.domain.model.TimelineCommentView
 import com.family.app.domain.model.TimelinePost
@@ -47,6 +51,10 @@ fun MeResponseDto.toDomain(): UserProfileSummary = UserProfileSummary(
     id = id,
     username = username,
     fullName = fullName,
+    cityProvince = cityProvince,
+    birthDate = birthDate,
+    bio = bio,
+    email = email,
     role = role,
     avatarUrl = avatarUrl
 )
@@ -55,6 +63,8 @@ fun FamilyMemberDto.toDomain(): FamilyMember = FamilyMember(
     id = id,
     username = username,
     fullName = fullName,
+    email = email,
+    cityProvince = cityProvince,
     bio = bio,
     birthDate = birthDate,
     avatarUrl = avatarUrl,
@@ -155,5 +165,22 @@ fun ChatEnvelopeDto.toDomain(): ChatEnvelope = ChatEnvelope(
     id = id,
     senderId = senderId,
     message = message,
+    createdAt = createdAt
+)
+
+fun SocialTargetLikeDto.toDomain(): SocialTargetLike = SocialTargetLike(
+    targetType = targetType,
+    targetId = targetId,
+    memberIds = memberIds
+)
+
+fun SocialCommentThreadDto.toDomain(): SocialCommentThread = SocialCommentThread(
+    id = id,
+    targetType = targetType,
+    targetId = targetId,
+    parentCommentId = parentCommentId,
+    authorId = authorId,
+    content = content,
+    likedMemberIds = likedMemberIds,
     createdAt = createdAt
 )

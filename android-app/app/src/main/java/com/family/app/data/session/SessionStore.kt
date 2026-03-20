@@ -7,11 +7,14 @@ import com.family.app.domain.model.ClanTreeLink
 import com.family.app.domain.model.ClanTreePerson
 import com.family.app.domain.model.ClanGroup
 import com.family.app.domain.model.FamilyGroup
+import com.family.app.domain.model.FamilyJoinRequest
 import com.family.app.domain.model.FamilyLocalEvent
 import com.family.app.domain.model.FamilyMemberRoleAssignment
 import com.family.app.domain.model.FamilyTask
 import com.family.app.domain.model.FinanceTransaction
 import com.family.app.domain.model.RewardPoint
+import com.family.app.domain.model.SocialCommentThread
+import com.family.app.domain.model.SocialTargetLike
 import com.family.app.domain.model.TaskTemplate
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -38,6 +41,15 @@ class SessionStore(context: Context) {
     }
 
     fun currentToken(): String? = _token.value
+
+    fun setAuthMemberId(value: Long?) {
+        prefs.edit().apply {
+            if (value == null) remove(KEY_AUTH_MEMBER_ID) else putLong(KEY_AUTH_MEMBER_ID, value)
+        }.apply()
+    }
+
+    fun getAuthMemberId(): Long? =
+        if (prefs.contains(KEY_AUTH_MEMBER_ID)) prefs.getLong(KEY_AUTH_MEMBER_ID, -1L).takeIf { it > 0L } else null
 
     fun saveRememberedLogin(username: String, password: String, remember: Boolean) {
         prefs.edit().apply {
@@ -117,14 +129,44 @@ class SessionStore(context: Context) {
         return runCatching { gson.fromJson<List<FamilyMemberRoleAssignment>>(json, type) ?: emptyList() }.getOrDefault(emptyList())
     }
 
+    fun getFamilyJoinRequests(): List<FamilyJoinRequest> {
+        val json = prefs.getString(KEY_FAMILY_JOIN_REQUESTS, null) ?: return emptyList()
+        val type = object : TypeToken<List<FamilyJoinRequest>>() {}.type
+        return runCatching { gson.fromJson<List<FamilyJoinRequest>>(json, type) ?: emptyList() }.getOrDefault(emptyList())
+    }
+
     fun saveFamilyRoles(roles: List<FamilyMemberRoleAssignment>) {
         prefs.edit().putString(KEY_FAMILY_ROLES, gson.toJson(roles)).apply()
+    }
+
+    fun saveFamilyJoinRequests(requests: List<FamilyJoinRequest>) {
+        prefs.edit().putString(KEY_FAMILY_JOIN_REQUESTS, gson.toJson(requests)).apply()
     }
 
     fun getClans(): List<ClanGroup> {
         val json = prefs.getString(KEY_CLANS, null) ?: return emptyList()
         val type = object : TypeToken<List<ClanGroup>>() {}.type
         return runCatching { gson.fromJson<List<ClanGroup>>(json, type) ?: emptyList() }.getOrDefault(emptyList())
+    }
+
+    fun getSocialLikes(): List<SocialTargetLike> {
+        val json = prefs.getString(KEY_SOCIAL_LIKES, null) ?: return emptyList()
+        val type = object : TypeToken<List<SocialTargetLike>>() {}.type
+        return runCatching { gson.fromJson<List<SocialTargetLike>>(json, type) ?: emptyList() }.getOrDefault(emptyList())
+    }
+
+    fun saveSocialLikes(items: List<SocialTargetLike>) {
+        prefs.edit().putString(KEY_SOCIAL_LIKES, gson.toJson(items)).apply()
+    }
+
+    fun getSocialComments(): List<SocialCommentThread> {
+        val json = prefs.getString(KEY_SOCIAL_COMMENTS, null) ?: return emptyList()
+        val type = object : TypeToken<List<SocialCommentThread>>() {}.type
+        return runCatching { gson.fromJson<List<SocialCommentThread>>(json, type) ?: emptyList() }.getOrDefault(emptyList())
+    }
+
+    fun saveSocialComments(items: List<SocialCommentThread>) {
+        prefs.edit().putString(KEY_SOCIAL_COMMENTS, gson.toJson(items)).apply()
     }
 
     fun saveClans(clans: List<ClanGroup>) {
@@ -216,6 +258,7 @@ class SessionStore(context: Context) {
 
     companion object {
         private const val KEY_TOKEN = "token"
+        private const val KEY_AUTH_MEMBER_ID = "auth_member_id"
         private const val KEY_REMEMBER = "remember_login"
         private const val KEY_USERNAME = "remember_username"
         private const val KEY_PASSWORD = "remember_password"
@@ -225,7 +268,10 @@ class SessionStore(context: Context) {
         private const val KEY_FINANCE = "family_finance_transactions"
         private const val KEY_FAMILIES = "family_groups"
         private const val KEY_FAMILY_ROLES = "family_member_roles"
+        private const val KEY_FAMILY_JOIN_REQUESTS = "family_join_requests"
         private const val KEY_CLANS = "clan_groups"
+        private const val KEY_SOCIAL_LIKES = "social_likes"
+        private const val KEY_SOCIAL_COMMENTS = "social_comments"
         private const val KEY_CLAN_JOIN_REQUESTS = "clan_join_requests"
         private const val KEY_CLAN_DELEGATIONS = "clan_permission_delegations"
         private const val KEY_ACTIVE_FAMILY_ID = "active_family_id"

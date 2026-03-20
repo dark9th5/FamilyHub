@@ -33,7 +33,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.BasicAlertDialog
@@ -78,10 +78,22 @@ import com.family.app.ui.theme.FamilySpacing
 // Mesh Gradient colors
 // Mesh-like Gradient colors
 private val MESH_BLUE = Color(0xFFD4EBF8)
-private val MESH_PINK = Color(0xFFEDD7E3)
+private val MESH_CYAN = Color(0xFFDBF5F4)
 private val MESH_BLUE_LIGHT = Color(0xFFE8F5FB)
-private val MESH_PINK_LIGHT = Color(0xFFF5E9EF)
+private val MESH_CYAN_LIGHT = Color(0xFFE9FBFA)
 private val MESH_TEXT_DARK = Color(0xFF2F4A5A)
+private val BUTTON_SOLID = Color(0xFFE3F0FF)
+private val BUTTON_SOFT = Color(0xFFEAF9FF)
+private val ACTION_PRIMARY_START = Color(0xFF1E63E9)
+private val ACTION_PRIMARY_END = Color(0xFF1394C8)
+private val ACTION_SECONDARY_START = Color(0xFFE8F2FF)
+private val ACTION_SECONDARY_END = Color(0xFFE4F7FF)
+private val ACTION_SECONDARY_BORDER = Color(0xFF7EACE4)
+private val ACTION_TEXT_ON_PRIMARY = Color(0xFFFFFFFF)
+private val ACTION_TEXT_ON_SECONDARY = Color(0xFF1F3D5A)
+private val EMPTY_STATE_CIRCLE_START = Color(0xFFDFF4EE)
+private val EMPTY_STATE_CIRCLE_END = Color(0xFFF3F7FF)
+private val EMPTY_STATE_ICON = Color(0xFF2E6D6A)
 
 @Composable
 fun PremiumScreenBackground(content: @Composable () -> Unit) {
@@ -154,19 +166,30 @@ fun HeroHeader(
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Surface(
                     shape = RoundedCornerShape(40.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = Color.Transparent,
                     modifier = Modifier.widthIn(min = 96.dp)
                 ) {
-                    Text(
-                        text = "FAMILY HUB",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = FamilySpacing.xs, vertical = FamilySpacing.xxs)
+                    Box(
+                        modifier = Modifier.background(
+                            Brush.linearGradient(
+                                colors = listOf(BUTTON_SOLID, BUTTON_SOFT)
+                            ),
+                            RoundedCornerShape(40.dp)
+                        )
                     )
+                    {
+                        Text(
+                            text = "FAMILY HUB",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MESH_TEXT_DARK,
+                            modifier = Modifier.padding(horizontal = FamilySpacing.xs, vertical = FamilySpacing.xxs)
+                        )
+                    }
                 }
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.headlineMedium
+                    style = if (title == "FAMILYHUB") MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
+                    color = MESH_TEXT_DARK
                 )
                 Text(
                     text = subtitle,
@@ -182,7 +205,7 @@ fun HeroHeader(
                 .height(6.dp)
                 .background(
                     Brush.linearGradient(
-                        colors = listOf(MESH_BLUE, MESH_BLUE_LIGHT, MESH_PINK),
+                        colors = listOf(MESH_BLUE, MESH_BLUE_LIGHT, MESH_CYAN),
                     ),
                     RoundedCornerShape(8.dp)
                 )
@@ -222,7 +245,17 @@ fun PremiumInput(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = {
+            Text(
+                text = label,
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(FamilyRadius.sm)
+                    )
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            )
+        },
         modifier = modifier.fillMaxWidth().heightIn(min = 56.dp),
         minLines = minLines,
         singleLine = minLines == 1,
@@ -268,44 +301,76 @@ fun PrimaryActionButton(text: String, onClick: () -> Unit, modifier: Modifier = 
                 .fillMaxWidth()
                 .background(
                     Brush.linearGradient(
-                        colors = listOf(MESH_BLUE, MESH_BLUE_LIGHT, MESH_PINK),
+                        colors = listOf(ACTION_PRIMARY_START, ACTION_PRIMARY_END),
+                        start = Offset(0f, 600f),
+                        end = Offset(600f, 0f)
                     ),
                     RoundedCornerShape(FamilyRadius.sm)
                 )
                 .border(
-                    BorderStroke(1.dp, MESH_TEXT_DARK.copy(alpha = 0.12f)),
+                    BorderStroke(1.dp, Color(0x8022658A)),
                     RoundedCornerShape(FamilyRadius.sm)
                 )
                 .padding(vertical = 14.dp, horizontal = FamilySpacing.md),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = text, style = MaterialTheme.typography.labelLarge, color = MESH_TEXT_DARK)
+            Text(text = text, style = MaterialTheme.typography.labelLarge, color = ACTION_TEXT_ON_PRIMARY)
         }
     }
 }
 
 @Composable
-fun SecondaryActionButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun SecondaryActionButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null
+) {
     OutlinedButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier,
         shape = RoundedCornerShape(FamilyRadius.sm),
-        border = BorderStroke(1.2.dp, Color(0xFFD4EBF8)),
+        border = BorderStroke(1.2.dp, ACTION_SECONDARY_BORDER),
         colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = MESH_BLUE_LIGHT.copy(alpha = 0.85f),
-            contentColor = MESH_TEXT_DARK
+            containerColor = Color.Transparent,
+            contentColor = ACTION_TEXT_ON_SECONDARY
         ),
-        contentPadding = PaddingValues(horizontal = FamilySpacing.md, vertical = FamilySpacing.xs)
+        contentPadding = PaddingValues(0.dp)
     ) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge)
+        Row(
+            modifier = Modifier
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(ACTION_SECONDARY_START, ACTION_SECONDARY_END),
+                        start = Offset(0f, 600f),
+                        end = Offset(600f, 0f)
+                    ),
+                    RoundedCornerShape(FamilyRadius.sm)
+                )
+                .padding(horizontal = FamilySpacing.md, vertical = FamilySpacing.xs),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (leadingIcon != null) {
+                Icon(leadingIcon, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+            }
+            Text(text = text, style = MaterialTheme.typography.labelLarge)
+            if (trailingIcon != null) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Icon(trailingIcon, contentDescription = null, modifier = Modifier.size(18.dp))
+            }
+        }
     }
 }
 
 @Composable
 fun TertiaryGhostButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     TextButton(onClick = onClick, enabled = enabled, modifier = modifier) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge)
+        Text(text = text, style = MaterialTheme.typography.labelLarge, color = ACTION_TEXT_ON_SECONDARY)
     }
 }
 
@@ -335,7 +400,7 @@ fun AvatarInitials(name: String, modifier: Modifier = Modifier, size: Dp = 44.dp
         modifier = modifier
             .size(size)
             .background(
-                Brush.radialGradient(listOf(MESH_BLUE, MESH_PINK)),
+                Brush.radialGradient(listOf(MESH_BLUE, MESH_CYAN)),
                 CircleShape
             ),
         contentAlignment = Alignment.Center
@@ -396,12 +461,16 @@ fun EmptyStateCard(title: String, subtitle: String, actionText: String? = null, 
                 modifier = Modifier
                     .matchParentSize()
                     .background(
-                        Brush.radialGradient(listOf(MESH_BLUE, MESH_PINK)),
+                        Brush.linearGradient(
+                            colors = listOf(EMPTY_STATE_CIRCLE_START, EMPTY_STATE_CIRCLE_END),
+                            start = Offset(0f, 0f),
+                            end = Offset(120f, 120f)
+                        ),
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.AcUnit, contentDescription = null, tint = MESH_TEXT_DARK)
+                Icon(Icons.Filled.AutoAwesome, contentDescription = null, tint = EMPTY_STATE_ICON)
             }
         }
         Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
